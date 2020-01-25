@@ -1,2 +1,3 @@
 # NetworkProvider
-A simple networking layer written in Swift
+v0.1
+A simple networking layer using URLSession written in Swift.
