@@ -22,6 +22,7 @@ public protocol NetworkService {
     var path: String { get }
     var parameters: Parameters? { get }
     var method: HTTPMethod { get }
+    var headers: [String: String]? { get }
 }
 
 extension NetworkService {
@@ -35,6 +36,7 @@ extension NetworkService {
 
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
+        request.allHTTPHeaderFields = headers
 
         return request
     }
