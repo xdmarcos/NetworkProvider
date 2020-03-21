@@ -13,7 +13,17 @@ private func DLog(_ message: String, function: String = #function) {
     #endif
 }
 
-public class NetworkProvider<T: NetworkService> {
+public protocol NetworkProviderProtopcol {
+
+    associatedtype T
+
+    var urlSession: URLSession { get set }
+    func request(service: T, completion: @escaping (Result<Data, Error>) -> Void)
+}
+
+public class NetworkProvider<T: NetworkService>: NetworkProviderProtopcol {
+
+    public typealias T = T
 
     public var urlSession = URLSession.shared
 
@@ -58,7 +68,12 @@ extension NetworkProvider {
 
         let task = urlSession.dataTask(with: request) { [weak self] (data, response, error) in
 
-            guard let self = self else { return }
+            guard let self = self else {
+
+                DLog("ATTENTION: NetworkProvider was deallocated! ❌")
+                return
+            }
+
             // Logging
             self.logResponse(response)
 
@@ -94,7 +109,7 @@ extension NetworkProvider {
 
         guard let response = response else {
 
-            DLog("The response does not exist (nil)")
+            DLog("The response does not exist (nil) ❌")
             return
         }
 
