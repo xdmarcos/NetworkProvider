@@ -9,15 +9,8 @@ import Foundation
 private func DLog(_ message: String, function: String = #function) {
 
     #if DEBUG
-        print("\(function): \(message)")
+        print("🚀 - NetworkProvider: \(function): \(message)")
     #endif
-}
-
-public enum Result<T> {
-
-    case success(T)
-    case failure(Error)
-    case empty
 }
 
 public class NetworkProvider<T: NetworkService> {
@@ -26,12 +19,12 @@ public class NetworkProvider<T: NetworkService> {
 
     public init() { }
 
-    public func request(service: T, completion: @escaping (Result<Data>) -> Void) {
+    public func request(service: T, completion: @escaping (Result<Data, Error>) -> Void) {
 
         call(service.urlRequest, completion: completion)
     }
 
-    public func request<U>(service: T, decodeType: U.Type, completion: @escaping (Result<U>) -> Void) where U: Decodable {
+    public func request<U>(service: T, decodeType: U.Type, completion: @escaping (Result<U, Error>) -> Void) where U: Decodable {
 
         call(service.urlRequest) { result in
 
@@ -51,9 +44,6 @@ public class NetworkProvider<T: NetworkService> {
             case .failure(let error):
 
                 completion(.failure(error))
-            case .empty:
-
-                completion(.empty)
             }
         }
     }
@@ -61,15 +51,16 @@ public class NetworkProvider<T: NetworkService> {
 
 extension NetworkProvider {
 
-    private func call(_ request: URLRequest, deliverQueue: DispatchQueue = DispatchQueue.main, completion: @escaping (Result<Data>) -> Void) {
+    private func call(_ request: URLRequest, deliverQueue: DispatchQueue = DispatchQueue.main, completion: @escaping (Result<Data, Error>) -> Void) {
 
-        DLog("Request: \(request)")
-        DLog("Request Method: \(request.httpMethod ?? "")")
-        DLog("Request Header: \(request.allHTTPHeaderFields ?? [:])")
+        // Logging
+        logRequest(request)
 
-        let task = urlSession.dataTask(with: request) { (data, response, error) in
+        let task = urlSession.dataTask(with: request) { [weak self] (data, response, error) in
 
-            DLog("Response: \(response ?? URLResponse())")
+            guard let self = self else { return }
+            // Logging
+            self.logResponse(response)
 
             if let error = error {
 
@@ -77,21 +68,36 @@ extension NetworkProvider {
 
                     completion(.failure(error))
                 }
-            } else if let data = data {
-
-                deliverQueue.async {
-
-                    completion(.success(data))
-                }
             } else {
 
                 deliverQueue.async {
 
-                    completion(.empty)
+                    completion(.success(data ?? Data()))
                 }
             }
         }
 
         task.resume()
+    }
+
+    private func logRequest(_ request: URLRequest) {
+
+        DLog("Request: \(request)")
+        DLog("Request Method: \(request.httpMethod ?? "")")
+        let httpBody = request.httpBody ?? Data()
+        let httpBodyString = String(data: httpBody, encoding: .utf8) ?? ""
+        DLog("Request Body: \(httpBodyString)")
+        DLog("Request Header: \(request.allHTTPHeaderFields ?? [:])")
+    }
+
+    private func logResponse(_ response: URLResponse?) {
+
+        guard let response = response else {
+
+            DLog("The response does not exist (nil)")
+            return
+        }
+
+        DLog("Response: \(response)")
     }
 }
