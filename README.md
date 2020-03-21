@@ -1,6 +1,6 @@
 # NetworkProvider
 
-v0.1
+v0.1.5
 A simple networking layer using URLSession written in Swift.
 
 - In this version only GET request method is handled.
