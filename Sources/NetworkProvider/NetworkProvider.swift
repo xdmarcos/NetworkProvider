@@ -17,8 +17,8 @@ public protocol NetworkProviderProtocol {
 
     associatedtype T
 
-    var urlSession: URLSession { get set }
     func request(service: T, completion: @escaping (Result<Data, Error>) -> Void)
+    func request<U: Decodable>(service: T, decodeType: U.Type, completion: @escaping (Result<U, Error>) -> Void) 
 }
 
 public class NetworkProvider<T: NetworkService>: NetworkProviderProtocol {
@@ -27,12 +27,15 @@ public class NetworkProvider<T: NetworkService>: NetworkProviderProtocol {
 
     public init() { }
 
-    public func request(service: T, completion: @escaping (Result<Data, Error>) -> Void) {
+    public func request(service: T,
+                        completion: @escaping (Result<Data, Error>) -> Void) {
 
-         call(service.urlRequest, completion: completion)
+        call(service.urlRequest, completion: completion)
     }
 
-    public func request<U>(service: T, decodeType: U.Type, completion: @escaping (Result<U, Error>) -> Void) where U: Decodable {
+    public func request<U: Decodable>(service: T,
+                                      decodeType: U.Type,
+                                      completion: @escaping (Result<U, Error>) -> Void) {
 
         call(service.urlRequest) { result in
 
@@ -59,7 +62,9 @@ public class NetworkProvider<T: NetworkService>: NetworkProviderProtocol {
 
 extension NetworkProvider {
 
-    private func call(_ request: URLRequest, deliverQueue: DispatchQueue = DispatchQueue.main, completion: @escaping (Result<Data, Error>) -> Void) {
+    private func call(_ request: URLRequest,
+                      deliverQueue: DispatchQueue = DispatchQueue.main,
+                      completion: @escaping (Result<Data, Error>) -> Void) {
 
         // Logging
         logRequest(request)
