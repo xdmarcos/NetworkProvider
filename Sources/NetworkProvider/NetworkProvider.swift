@@ -13,7 +13,7 @@ private func DLog(_ message: String, function: String = #function) {
     #endif
 }
 
-public protocol NetworkProviderProtopcol {
+public protocol NetworkProviderProtocol {
 
     associatedtype T
 
@@ -21,9 +21,7 @@ public protocol NetworkProviderProtopcol {
     func request(service: T, completion: @escaping (Result<Data, Error>) -> Void)
 }
 
-public class NetworkProvider<T: NetworkService>: NetworkProviderProtopcol {
-
-    public typealias T = T
+public class NetworkProvider<T: NetworkService>: NetworkProviderProtocol {
 
     public var urlSession = URLSession.shared
 
@@ -31,7 +29,7 @@ public class NetworkProvider<T: NetworkService>: NetworkProviderProtopcol {
 
     public func request(service: T, completion: @escaping (Result<Data, Error>) -> Void) {
 
-        call(service.urlRequest, completion: completion)
+         call(service.urlRequest, completion: completion)
     }
 
     public func request<U>(service: T, decodeType: U.Type, completion: @escaping (Result<U, Error>) -> Void) where U: Decodable {
