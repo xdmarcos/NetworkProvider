@@ -18,7 +18,6 @@ public protocol NetworkProviderProtocol {
     associatedtype Service: NetworkService
 
     func request(service: Service, completion: @escaping (Result<Data, Error>) -> Void)
-    func request<U: Decodable>(service: Service, decodeType: U.Type, completion: @escaping (Result<U, Error>) -> Void)
 }
 
 public class NetworkProvider<T: NetworkService>: NetworkProviderProtocol {
@@ -31,32 +30,6 @@ public class NetworkProvider<T: NetworkService>: NetworkProviderProtocol {
                         completion: @escaping (Result<Data, Error>) -> Void) {
 
         call(service.urlRequest, completion: completion)
-    }
-
-    public func request<U: Decodable>(service: T,
-                                      decodeType: U.Type,
-                                      completion: @escaping (Result<U, Error>) -> Void) {
-
-        call(service.urlRequest) { result in
-
-            switch result {
-
-            case .success(let data):
-
-                let decoder = JSONDecoder()
-                do {
-
-                    let resp = try decoder.decode(decodeType, from: data)
-                    completion(.success(resp))
-                } catch {
-
-                    completion(.failure(error))
-                }
-            case .failure(let error):
-
-                completion(.failure(error))
-            }
-        }
     }
 }
 
