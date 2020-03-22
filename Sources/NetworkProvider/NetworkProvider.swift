@@ -15,10 +15,10 @@ private func DLog(_ message: String, function: String = #function) {
 
 public protocol NetworkProviderProtocol {
 
-    associatedtype T
+    associatedtype Service: NetworkService
 
-    func request(service: T, completion: @escaping (Result<Data, Error>) -> Void)
-    func request<U: Decodable>(service: T, decodeType: U.Type, completion: @escaping (Result<U, Error>) -> Void) 
+    func request(service: Service, completion: @escaping (Result<Data, Error>) -> Void)
+    func request<U: Decodable>(service: Service, decodeType: U.Type, completion: @escaping (Result<U, Error>) -> Void)
 }
 
 public class NetworkProvider<T: NetworkService>: NetworkProviderProtocol {
