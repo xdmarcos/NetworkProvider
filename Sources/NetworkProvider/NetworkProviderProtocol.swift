@@ -9,9 +9,9 @@ import Foundation
 public protocol NetworkProviderProtocol {
   associatedtype Service: NetworkService
 
-  func request(
+  func request<T: Decodable>(
     service: Service,
     deliverQueue: DispatchQueue,
-    completion: @escaping (Result<Data, Swift.Error>) -> Void
+    completion: @escaping (Result<T, Swift.Error>) -> Void
   )
 }
