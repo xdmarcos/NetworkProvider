@@ -1,5 +1,5 @@
 //
-//  NetworkProvider.swift
+//  NetworkProviderProtocol.swift
 //
 //  Created by xdmgzdev on 26/12/2019.
 //
@@ -7,10 +7,9 @@
 import Foundation
 
 public protocol NetworkProviderProtocol {
-  associatedtype Service: NetworkService
-
+  var service: NetworkService { get }
   func request<T: Decodable>(
-    service: Service,
+    dataType: T.Type,
     deliverQueue: DispatchQueue,
     completion: @escaping (Result<T, Swift.Error>) -> Void
   )
