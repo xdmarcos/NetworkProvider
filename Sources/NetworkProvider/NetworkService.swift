@@ -12,6 +12,7 @@ public enum HttpHeaderKey {
   static let contentLength = "Content-Length"
   static let contentDisposition = "Content-Disposition"
   static let accept = "Accept"
+  static let authorization = "Authorization"
 }
 
 public enum HttpMethod: String {
@@ -19,15 +20,21 @@ public enum HttpMethod: String {
   case post = "POST"
   case patch = "PATCH"
   case delete = "DELETE"
+  case connect = "CONNECT"
+  case head = "HEAD"
+  case options = "OPTIONS"
+  case put = "PUT"
+  case trace = "TRACE"
 }
 
 public protocol NetworkService {
   var baseURL: String { get }
+  var path: String { get }
   var method: HttpMethod { get }
   var httpBody: Encodable? { get }
   var headers: [String: String]? { get }
   var queryParameters: [URLQueryItem]? { get }
-  var path: String { get }
+  var timeout: TimeInterval? { get }
 }
 
 public extension NetworkService {
@@ -39,6 +46,7 @@ public extension NetworkService {
     var request = URLRequest(url: url)
     request.httpMethod = method.rawValue
     request.allHTTPHeaderFields = headers
+    request.timeoutInterval = timeout ?? 60.0
 
     if let httpBody = httpBody {
       request.httpBody = try? httpBody.jsonEncode()
